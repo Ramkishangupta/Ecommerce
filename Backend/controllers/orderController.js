@@ -75,18 +75,18 @@ exports.getAllOrders = catchAsyncError(async (req, res, next) => {
 
   //get all orders
 exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
-    const order = await Order.find(req.params.id);
+    const order = await Order.findById(req.params.id);
 
     if(order.orderStatus === "Delivered"){
         return next(new ErrorHandler("You have already dileverd this product",400));
     }
 
-    order.orderItems.forEach(async(order) =>{
-         await updateStock(order.Product,order.quantity);
+    order.orderItems.forEach(async(or) =>{
+         await updateStock(or.Product,or.quantity);
     });
 
     order.orderStatus = req.body.status;
-    if(req.body.status === "DElivered"){
+    if(req.body.status === "Delivered"){
         order.deliveredAt = Date.now();
     }
     await order.save({validateBeforeSave: false})
@@ -104,7 +104,7 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
 
   //delete order
   exports.deleteOrder = catchAsyncError(async(req,res,next)=>{
-    const order = await Order.find(req.params.id);
+    const order = await Order.findById(req.params.id);
     await order.remove();
 
     res.status(201).json({
